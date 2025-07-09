@@ -2,24 +2,65 @@
 <html>
 <head>
     <title>Liver Disease Predictor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h2>Liver Disease Prediction</h2>
     <form action="/predict" method="post">
-        <label>Age:</label><input type="text" name="Age"><br>
-        <label>Gender (1=Male, 0=Female):</label><input type="text" name="Gender"><br>
-        <label>Total Bilirubin:</label><input type="text" name="Total_Bilirubin"><br>
-        <label>Direct Bilirubin:</label><input type="text" name="Direct_Bilirubin"><br>
-        <label>Alkaline Phosphotase:</label><input type="text" name="Alkaline_Phosphotase"><br>
-        <label>Alamine Aminotransferase:</label><input type="text" name="Alamine_Aminotransferase"><br>
-        <label>Aspartate Aminotransferase:</label><input type="text" name="Aspartate_Aminotransferase"><br>
-        <label>Total Proteins:</label><input type="text" name="Total_Proteins"><br>
-        <label>Albumin:</label><input type="text" name="Albumin"><br>
-        <label>Albumin and Globulin Ratio:</label><input type="text" name="Albumin_and_Globulin_Ratio"><br>
+        {% for field in [
+            'Age', 'Gender', 'Total_Bilirubin', 'Direct_Bilirubin', 'Alkaline_Phosphotase',
+            'Alamine_Aminotransferase', 'Aspartate_Aminotransferase', 'Total_Proteins',
+            'Albumin', 'Albumin_and_Globulin_Ratio'] %}
+            <label>{{ field.replace('_', ' ') }}:</label>
+            <input type="text" name="{{ field }}" required><br>
+        {% endfor %}
         <input type="submit" value="Predict">
     </form>
+
     {% if prediction %}
     <h3>Prediction: {{ prediction }}</h3>
+
+    <h4>Input Summary</h4>
+    <table border="1">
+        {% for key, value in input_data.items() %}
+        <tr>
+            <td>{{ key.replace('_', ' ') }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h4>Enzyme Levels Comparison</h4>
+    <canvas id="enzymeChart" width="400" height="200"></canvas>
+    <script>
+        const enzymeData = {
+            labels: ['Alkaline Phosphotase', 'Alamine Aminotransferase', 'Aspartate Aminotransferase'],
+            datasets: [{
+                label: 'Patient',
+                data: [
+                    {{ input_data['Alkaline_Phosphotase'] }},
+                    {{ input_data['Alamine_Aminotransferase'] }},
+                    {{ input_data['Aspartate_Aminotransferase'] }}
+                ],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            },
+            {
+                label: 'Healthy Avg',
+                data: [120, 30, 35],
+                backgroundColor: ['#cccccc', '#cccccc', '#cccccc']
+            }]
+        };
+
+        new Chart(document.getElementById('enzymeChart'), {
+            type: 'bar',
+            data: enzymeData,
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
     {% endif %}
 </body>
 </html>
