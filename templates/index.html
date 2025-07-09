@@ -3,25 +3,103 @@
 <head>
     <title>Liver Disease Predictor</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            padding: 30px;
+        }
+
+        h2, h3, h4 {
+            color: #2c3e50;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 600px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        label {
+            font-size: 14px;
+        }
+
+        input[type="text"], input[type="submit"] {
+            padding: 6px;
+            margin-top: 4px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .result-box {
+            margin-top: 30px;
+            background-color: #e6ffe6;
+            padding: 15px;
+            border-left: 5px solid #4CAF50;
+            border-radius: 10px;
+            width: 620px;
+        }
+
+        table {
+            background-color: #fff;
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 600px;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+
+        canvas {
+            margin-top: 25px;
+        }
+    </style>
 </head>
 <body>
+
     <h2>Liver Disease Prediction</h2>
+
     <form action="/predict" method="post">
-        {% for field in [
-            'Age', 'Gender', 'Total_Bilirubin', 'Direct_Bilirubin', 'Alkaline_Phosphotase',
-            'Alamine_Aminotransferase', 'Aspartate_Aminotransferase', 'Total_Proteins',
-            'Albumin', 'Albumin_and_Globulin_Ratio'] %}
-            <label>{{ field.replace('_', ' ') }}:</label>
-            <input type="text" name="{{ field }}" required><br>
-        {% endfor %}
-        <input type="submit" value="Predict">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            {% for field in [
+                'Age', 'Gender', 'Total_Bilirubin', 'Direct_Bilirubin',
+                'Alkaline_Phosphotase', 'Alamine_Aminotransferase',
+                'Aspartate_Aminotransferase', 'Total_Proteins',
+                'Albumin', 'Albumin_and_Globulin_Ratio'] %}
+                <div>
+                    <label>{{ field.replace('_', ' ') }}:</label>
+                    <input type="text" name="{{ field }}" required>
+                </div>
+            {% endfor %}
+        </div>
+        <div style="text-align: center;">
+            <input type="submit" value="Predict">
+        </div>
     </form>
 
     {% if prediction %}
-    <h3>Prediction: {{ prediction }}</h3>
+    <div class="result-box">
+        <h3>Result: {{ prediction }}</h3>
+        {% if probability %}
+            <p>Confidence: <strong>{{ probability }}%</strong></p>
+        {% endif %}
+    </div>
 
-    <h4>Input Summary</h4>
-    <table border="1">
+    <h4>Patient Input Summary</h4>
+    <table>
         {% for key, value in input_data.items() %}
         <tr>
             <td>{{ key.replace('_', ' ') }}</td>
@@ -31,7 +109,7 @@
     </table>
 
     <h4>Enzyme Levels Comparison</h4>
-    <canvas id="enzymeChart" width="400" height="200"></canvas>
+    <canvas id="enzymeChart" width="300" height="150"></canvas>
     <script>
         const enzymeData = {
             labels: ['Alkaline Phosphotase', 'Alamine Aminotransferase', 'Aspartate Aminotransferase'],
@@ -55,10 +133,28 @@
             type: 'bar',
             data: enzymeData,
             options: {
-                scales: {
-                    y: { beginAtZero: true }
-                }
+                responsive: false,
+                scales: { y: { beginAtZero: true } }
             }
+        });
+    </script>
+
+    <h4>Prediction Summary Report</h4>
+    <canvas id="summaryChart" width="300" height="150"></canvas>
+    <script>
+        const summaryData = {
+            labels: ['Liver Disease Detected', 'No Liver Disease'],
+            datasets: [{
+                label: 'Prediction Count',
+                data: [{{ summary['Liver Disease Detected'] }}, {{ summary['No Liver Disease'] }}],
+                backgroundColor: ['#ff6666', '#66cc66']
+            }]
+        };
+
+        new Chart(document.getElementById('summaryChart'), {
+            type: 'pie',
+            data: summaryData,
+            options: { responsive: false }
         });
     </script>
     {% endif %}
