@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liver Disease Predictor</title>
+</head>
+<body>
+    <h2>Liver Disease Prediction</h2>
+    <form action="/predict" method="post">
+        <label>Age:</label><input type="text" name="Age"><br>
+        <label>Gender (1=Male, 0=Female):</label><input type="text" name="Gender"><br>
+        <label>Total Bilirubin:</label><input type="text" name="Total_Bilirubin"><br>
+        <label>Direct Bilirubin:</label><input type="text" name="Direct_Bilirubin"><br>
+        <label>Alkaline Phosphotase:</label><input type="text" name="Alkaline_Phosphotase"><br>
+        <label>Alamine Aminotransferase:</label><input type="text" name="Alamine_Aminotransferase"><br>
+        <label>Aspartate Aminotransferase:</label><input type="text" name="Aspartate_Aminotransferase"><br>
+        <label>Total Proteins:</label><input type="text" name="Total_Proteins"><br>
+        <label>Albumin:</label><input type="text" name="Albumin"><br>
+        <label>Albumin and Globulin Ratio:</label><input type="text" name="Albumin_and_Globulin_Ratio"><br>
+        <input type="submit" value="Predict">
+    </form>
+    {% if prediction %}
+    <h3>Prediction: {{ prediction }}</h3>
+    {% endif %}
+</body>
+</html>
